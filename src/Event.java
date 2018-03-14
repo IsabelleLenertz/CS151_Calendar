@@ -1,7 +1,7 @@
 import java.time.LocalTime;
 import java.util.Calendar;
 
-public final class Event {
+public final class Event implements Comparable<Event> {
 	
 	public enum Day {
 	    SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 
@@ -28,6 +28,20 @@ public final class Event {
 	public LocalTime getEventStart() { return this.start; }
 	public LocalTime getEventEnd() { return this.end; }
 	public Calendar getEventDate() { return this.date; }
-	public String toString() { return 
+	public String toString() { return "";}
+
+	@Override
+	public int compareTo(Event other) {		
+		// Compare the year, month, and day
+		int year = this.date.get(Calendar.YEAR) - other.date.get(Calendar.YEAR);
+		if (year != 0) { return year; }
+		int month = this.date.get(Calendar.MONTH) - other.date.get(Calendar.MONTH);
+		if (month != 0) { return month; }
+		int day = this.date.get(Calendar.DATE) - other.date.get(Calendar.DATE);
+		if (day != 0) { return day; }
+		
+		// Then compare the starting time
+		return this.start.compareTo(other.start);
+	}
 
 }
