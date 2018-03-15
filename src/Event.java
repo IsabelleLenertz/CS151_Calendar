@@ -34,7 +34,17 @@ public final class Event implements Comparable<Event>, Serializable {
 	public LocalTime getEventStart() { return this.start; }
 	public LocalTime getEventEnd() { return this.end; }
 	public Calendar getEventDate() { return this.date; }
-	public String toString() { return "";}
+	
+	/**
+	 * Format of the String returned by the method()
+	 * Wednesday, Feb 21, 2018 
+	 * Dr. Kim's office hour 9:15 - 10:15 
+
+	 */
+	public String toString() { 
+		return Day.values()[date.get(Calendar.DAY_OF_WEEK)-1].toString() + ", " + Month.values()[date.get(Calendar.MONTH)-1].toString().substring(0, 3);
+		
+	}
 
 	@Override
 	public int compareTo(Event other) {		
