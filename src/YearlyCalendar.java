@@ -1,11 +1,16 @@
-import java.time.LocalTime;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class YearlyCalendar implements Comparable<YearlyCalendar>{
+public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -588723263051515363L;
+
 	public static final int DAYS_IN_A_WEEK = 7;
 	public static final int MONTHS_IN_YEAR = 12;
 

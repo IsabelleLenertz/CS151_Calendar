@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -5,8 +6,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-public class MyCalendar {
+public class MyCalendar implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8135952509631155591L;
 	private Map<Integer, YearlyCalendar> calendar;;
 
 	/**

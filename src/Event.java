@@ -1,8 +1,14 @@
+import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.Calendar;
 
-public final class Event implements Comparable<Event> {
+public final class Event implements Comparable<Event>, Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 304520817428918788L;
+
 	public enum Day {
 	    SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 
 	}

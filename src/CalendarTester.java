@@ -1,3 +1,4 @@
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -5,13 +6,11 @@ import java.util.Scanner;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
-public class CalendarTester {
-
-		
-	
+public class CalendarTester {	
 
 	public static void main(String[] args) {
 		printCurrentMonth();
+		MyCalendar calendar = null;
 		char choice = 0;
 		
 		while (choice != 'Q') {
@@ -19,13 +18,13 @@ public class CalendarTester {
 			
 			switch(choice) {
 				case('L'):
-					System.out.println("l");
+					calendar = load();
 					break;
 				case('V'):
 					System.out.println("v");
 					break;
 				case('C'):
-					System.out.println("c");
+					create(calendar);
 					break;
 				case('G'):
 					System.out.println("g");
@@ -41,7 +40,7 @@ public class CalendarTester {
 		
 	}
 
-	public static void printCurrentMonth() {
+	private static void printCurrentMonth() {
 		Calendar calendar = getTodayCalifornianCalendar();
 		String currentMonth = Event.Month.values()[calendar.get(Calendar.MONTH)].toString();
 
@@ -63,7 +62,7 @@ public class CalendarTester {
 		}
 		
 		while(currentDay <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-			while(dayOfWeek < MyCalendar.DAYS_IN_A_WEEK) {
+			while(dayOfWeek < YearlyCalendar.DAYS_IN_A_WEEK) {
 				dayNumber = String.format("%-3s", currentDay);
 				if (currentDay != today) {
 					System.out.print(dayNumber);
@@ -84,7 +83,7 @@ public class CalendarTester {
 		
 	}
 	
-	public static Calendar getTodayCalifornianCalendar() {
+	private static Calendar getTodayCalifornianCalendar() {
 		 // Get local time zone for California (Pacific Standard Time)
 		 String[] timeZoneId = TimeZone.getAvailableIDs(-8 * 60 * 60 * 1000);
 		 // if no timeZone was returned, exit program.
@@ -106,7 +105,7 @@ public class CalendarTester {
 		 return calendar;
 	}
 
-	public static char displayMainMenu() {
+	private static char displayMainMenu() {
 		Scanner in = new Scanner(System.in);
 		char userInput = 0;
 		
@@ -119,5 +118,69 @@ public class CalendarTester {
 			}
 		}
 		return userInput;
+	}
+	
+	/**
+	 * Load a calendar from memory
+	 */
+	private static MyCalendar load() {	
+		MyCalendar cal = null;
+		
+		// TODO: load the calendar
+
+		if (cal == null) {
+			System.out.println("You need to create and save a calendar first.");
+		}
+		return cal;
+	}
+	
+	private static void create(MyCalendar cal) {
+		Scanner in = new Scanner(System.in);
+		// Get the title
+		System.out.print("Title: ");
+		String title = in.nextLine();
+		
+		// Get the date
+		in.useDelimiter("[^0-9]+");
+		System.out.print("Date (Format MM/DD/YYYY): ");
+		int month = in.nextInt();
+		int date = in.nextInt();
+		int year = in.nextInt();
+		in.nextLine();
+		
+		// Get starting time
+		System.out.print("Starting time (24 hours clock, HH:MM): ");
+		int startH = in.nextInt();
+		int startM = in.nextInt();
+		in.nextLine();
+		
+		// Get ending time
+		System.out.print("Starting time (24 hours clock, HH:MM, leave blank if not appropriate): ");
+		Integer endH = null;
+		Integer endM= null;
+		if(in.hasNextInt()) {
+			endH = in.nextInt();
+			in.next();
+			endM = in.nextInt();
+		}
+		in.nextLine();
+		
+		// Create a new event
+		Calendar day = getTodayCalifornianCalendar();
+		day.set(Calendar.YEAR,  year);
+		day.set(Calendar.MONTH, month);
+		day.set(Calendar.DATE, date);
+		LocalTime start = LocalTime.of(startH, startM);
+		LocalTime end = null;
+		if(endH != null) {
+			end = LocalTime.of(endH,  endM);
+		}
+		
+
+		// Check if the event is conflicting
+		
+		// Add to calendar
+		
+		// Save to disk
 	}
 }
