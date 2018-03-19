@@ -28,7 +28,7 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 		eventsByMonths = (Set<Event>[]) new Set<?>[MONTHS_IN_YEAR];
 		// Initializes all the sets using a tree set.
 		for(int i = 0; i < MONTHS_IN_YEAR; i++) {
-			eventsByMonths[0] = new TreeSet<Event>();
+			eventsByMonths[i] = new TreeSet<Event>();
 		}
 	}
 	
@@ -37,7 +37,7 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 	 * @param event event to add to the calendar
 	 */
 	public void addEvent(Event event) {
-		eventsByMonths[event.getEventDate().get(Calendar.MONTH) - 1].add(event);
+		eventsByMonths[event.getEventDate().get(Calendar.MONTH)].add(event);
 	}
 	
 	/**
@@ -59,10 +59,15 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 		ArrayList<Event> list = new ArrayList<>();
 		int date = day.get(Calendar.DATE);
 		int month = day.get(Calendar.MONTH);
-		Iterator<Event> it = eventsByMonths[month-1].iterator();
+		Iterator<Event> it = eventsByMonths[month].iterator();
+		Event temp;
 		
 		// Get the first event
-		Event temp = it.next();	
+		if(it.hasNext()) {
+			temp = it.next();	
+		} else {
+			return list;
+		}
 		// Check all the event the the last one visited
 		while (it.hasNext() && temp.getEventDate().get(Calendar.DATE) < date) {
 			if (temp.getEventDate().get(Calendar.DATE) == date){

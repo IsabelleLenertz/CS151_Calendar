@@ -65,13 +65,22 @@ public class MyCalendar implements Serializable{
 	 * @param day day the events are occurring on (only Year, Month, and Date matter)
 	 * @return an arrayList with all the events
 	 */
-	public ArrayList<Event> getDailyEvents(GregorianCalendar day){
+	public ArrayList<Event> getDailyEvents(Calendar day){
 		int year = day.get(Calendar.YEAR);
 		YearlyCalendar cal = this.calendar.get(year);
 		if (cal != null) {
 			return cal.getOneDayEvents(day);
 		}
 		return null;
+	}
+	
+	/**
+	 * Check if an event is conflicting with the current calendar
+	 * @param event event to check against the calendar
+	 * @return true if the event is conflicting with the existing events in the calendar
+	 */
+	public boolean isConflicting(Event event) {
+		return false;
 	}
 	
 
