@@ -80,10 +80,23 @@ public class MyCalendar implements Serializable{
 	 * @return true if the event is conflicting with the existing events in the calendar
 	 */
 	public boolean isConflicting(Event event) {
+		// TODO
 		return false;
 	}
 	
+	/**
+	 * Display all the events in chronological order
+	 */
+	public String toString() {
+		String returnValue = "";
+		for (Map.Entry<Integer, YearlyCalendar> entry : calendar.entrySet()) {
+			returnValue += entry.getKey() + "\n" 
+					+ entry.getValue().toString();
+		}
+		return returnValue;
+	}
 
+	
 
 
 }

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+
 public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 	/**
 	 * 
@@ -102,5 +103,16 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 	public int compareTo(YearlyCalendar o) {
 		// TODO Auto-generated method stub
 		return this.year - o.year;
+	}
+	
+	public String toString() {
+		String returnValue = "";
+		for (int i = 0; i < MONTHS_IN_YEAR; i++) {
+			// Append to the string
+			for (Event event : eventsByMonths[i]) {
+				returnValue += event.toString() + "\n";
+			}
+		}
+		return returnValue;
 	}
 }

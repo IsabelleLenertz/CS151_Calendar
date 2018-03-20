@@ -43,7 +43,7 @@ public final class Event implements Comparable<Event>, Serializable {
 	 */
 	public String toString() { 
 		return Day.values()[date.get(Calendar.DAY_OF_WEEK)-1].toString() + ", " 
-				+ Month.values()[date.get(Calendar.MONTH)-1].toString().substring(0, 3);
+				+ Month.values()[date.get(Calendar.MONTH)].toString().substring(0, 3);
 		
 	}
 

@@ -38,11 +38,12 @@ public class CalendarTester {
 					create(calendar);
 					break;
 				case('G'):
-					System.out.println("g");
-					// TODO
+					goTo(calendar);
 					break;
 				case('E'):
-					System.out.println("e");
+					if (calendar != null) {
+						System.out.println(calendar);
+					}
 					// TODO
 					break;
 				case('D'):
@@ -190,7 +191,7 @@ public class CalendarTester {
 		// Create a new event
 		Calendar day = getTodayCalifornianCalendar();
 		day.set(Calendar.YEAR,  year);
-		day.set(Calendar.MONTH, month);
+		day.set(Calendar.MONTH, month-1);
 		day.set(Calendar.DATE, date);
 		LocalTime start = LocalTime.of(startH, startM);
 		LocalTime end = null;
@@ -328,5 +329,25 @@ public class CalendarTester {
 			System.out.print("\n");
 			dayOfWeek = 0;
 		}
+	}
+
+	private static void goTo(MyCalendar cal) {
+		
+		// Ask the user for a day
+		Scanner in = new Scanner(System.in);
+		System.out.println("Enter a date (MM/DD/YYYY): ");
+		in.useDelimiter("[^0-9]+");
+		int month = in.nextInt();
+		int date = in.nextInt();
+		int year = in.nextInt();
+		in.nextLine();
+		// Create the appropriate calendar object
+		Calendar day = getTodayCalifornianCalendar();
+		day.set(Calendar.YEAR,  year);
+		day.set(Calendar.MONTH, month-1);
+		day.set(Calendar.DATE, date);
+		
+		// Print the events of the day
+		printDay(cal, day);
 	}
 }
