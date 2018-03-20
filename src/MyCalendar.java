@@ -1,11 +1,15 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * Calendar for an undetermined period of time (years are added on the go)
+ * @author isabelle Delmas
+ *
+ */
 public class MyCalendar implements Serializable{
 
 	/**
@@ -34,16 +38,21 @@ public class MyCalendar implements Serializable{
 	 * Add an event to the calendar
 	 * precondition: event is non null
 	 * @param event event to add to the calendar
+	 * @return true if the event was successfully added
 	 */
-	public void addEvent(Event event) {
+	public boolean addEvent(Event event) {
+		boolean success;
+		
 		// Check if the year already exists, if not create the year
 		Integer year = event.getEventDate().get(Calendar.YEAR);
 		YearlyCalendar cal = this.calendar.get(year);
 		if (cal == null) {
 			cal = new YearlyCalendar(year);
 		}
-		cal.addEvent(event);
+		success = cal.addEvent(event);
 		this.calendar.put(year, cal);
+		
+		return success;
 	}
 	
 	/**
@@ -74,15 +83,6 @@ public class MyCalendar implements Serializable{
 		return null;
 	}
 	
-	/**
-	 * Check if an event is conflicting with the current calendar
-	 * @param event event to check against the calendar
-	 * @return true if the event is conflicting with the existing events in the calendar
-	 */
-	public boolean isConflicting(Event event) {
-		// TODO
-		return false;
-	}
 	
 	/**
 	 * Display all the events in chronological order
@@ -96,6 +96,11 @@ public class MyCalendar implements Serializable{
 		return returnValue;
 	}
 	
+	/**
+	 * Remove an event from the calendar.
+	 * Does nothing if the event is not in the calendar
+	 * @param event event to remove
+	 */
 	public void remove(Event event) {
 		int year = event.getEventDate().get(Calendar.YEAR);
 		YearlyCalendar cal = this.calendar.get(year);

@@ -1,5 +1,4 @@
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,6 +15,11 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+/**
+ * Test the personal calendar
+ * @author isabelle Delmas
+ *
+ */
 public class CalendarTester {	
 	private static final String FILE_NAME = "myCalendar.txt";
 
@@ -23,6 +27,11 @@ public class CalendarTester {
 		printCurrentMonth();
 		MyCalendar calendar = null;
 		char choice = 0;
+		
+		
+		System.out.println("Any modification to the calendar (add, delete); will automaticaly be saved to disk.\n"
+				+ "Do not forget to load the existing file first if your do not want to overwrite it.");
+
 		
 		while (choice != 'Q') {
 			choice = displayMainMenu();
@@ -36,7 +45,7 @@ public class CalendarTester {
 					viewBy(calendar);
 					break;
 				case('C'):
-					create(calendar);
+					calendar = create(calendar);
 					break;
 				case('G'):
 					goTo(calendar);
@@ -56,6 +65,10 @@ public class CalendarTester {
 		
 	}
 
+	/**
+	 * Print a view of the current month
+	 * Helper function for main()
+	 */
 	private static void printCurrentMonth() {
 		Calendar calendar = getTodayCalifornianCalendar();
 		String currentMonth = Event.Month.values()[calendar.get(Calendar.MONTH)].toString();
@@ -83,9 +96,7 @@ public class CalendarTester {
 				if (currentDay != today) {
 					System.out.print(dayNumber);
 				} else {
-					System.out.print(ConsoleColors.RED_BOLD);
-					System.out.printf("%-3s", currentDay);
-					System.out.print(ConsoleColors.RESET);
+					System.out.print("{" + currentDay + "}");
 
 				}
 				dayOfWeek++;
@@ -99,6 +110,12 @@ public class CalendarTester {
 		
 	}
 	
+	/**
+	 * Get a Gregorian calendar setup with the pacific time zone and the daylight saving time
+	 * the day is today and the time is the time of the run
+	 * Helper function for main()
+	 * @return today's calendar
+	 */
 	private static Calendar getTodayCalifornianCalendar() {
 		 // Get local time zone for California (Pacific Standard Time)
 		 String[] timeZoneId = TimeZone.getAvailableIDs(-8 * 60 * 60 * 1000);
@@ -121,7 +138,13 @@ public class CalendarTester {
 		 return calendar;
 	}
 
+	/**
+	 * Display the main menu and ask the user for a choice
+	 * Helper function for main()
+	 * @return a char with the user's choice
+	 */
 	private static char displayMainMenu() {
+		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
 		char userInput = 0;
 		
@@ -155,10 +178,18 @@ public class CalendarTester {
 		return cal;
 	}
 	
-	private static void create(MyCalendar cal) {
+	/**
+	 * Get input from the user to create a new event
+	 * Add the event to the calendar if valid
+	 * Save to disk if the calendar was modified
+	 * Helper function for main()
+	 * @param cal calendar to add the event to
+	 */
+	private static MyCalendar create(MyCalendar cal) {
 		if (cal == null) {
 			cal = new MyCalendar();
 		}
+		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
 		// Get the title
 		System.out.print("Title: ");
@@ -223,7 +254,6 @@ public class CalendarTester {
 		Scanner endtime = new Scanner(in.nextLine());
 		Integer endH = null;
 		Integer endM= null;
-		// TODO fix it no integer entered
 		endtime.useDelimiter("[^0-9]+");
 		if(endtime.hasNextInt()) {
 			endH = endtime.nextInt();
@@ -254,21 +284,24 @@ public class CalendarTester {
 		
 
 		// Check if the event is conflicting
-		if (!cal.isConflicting(newEvent)) {
-			// Add to calendar
-			cal.addEvent(newEvent);
-			
+		if (cal.addEvent(newEvent)) {
+			// Add to calendar		
 			System.out.println("The following event has been added to the calendar:");
 			System.out.println(newEvent);
 			
 			// Save to disk
 			save(cal);
 		} else {
-			System.out.print("Event not saved, there was a conflict with the calendar.");
+			System.out.println("Event not saved, there was a conflict with the calendar.");
 		}
-		
+		 return cal;
 	}
 	
+	/**
+	 * Save the calendar to disk
+	 * Helper function for main()
+	 * @param cal calendar to save to disk
+	 */
 	private static void save(MyCalendar cal) {
 		if (cal == null) {
 			System.out.println("You need to create or load a calendar first.");
@@ -282,13 +315,18 @@ public class CalendarTester {
 		}
 	}
 
+	/**
+	 * Let the user view events in the calendar
+	 * Helper function for main()
+	 * @param cal calendar to look at
+	 */
 	private static void viewBy(MyCalendar cal) {
 		if (cal == null) {
 			System.out.println("You need to create or load a calendar first.");
 			return;
 		}
 		
-		System.out.println("[D]ay view or [M]view ? ");
+		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
 		char userInput = 0;
 		
@@ -310,9 +348,9 @@ public class CalendarTester {
 					userInput = in.nextLine().toUpperCase().charAt(0);
 				} while (userInput != 'M' && userInput != 'P' && userInput != 'N');
 				if (userInput == 'N') {
-					date.roll(Calendar.DATE,  true);
+					date.add(Calendar.DATE,  1);
 				} else if (userInput == 'P') {
-					date.roll(Calendar.DATE,  false);
+					date.add(Calendar.DATE,  -1);
 				}
 			} while (userInput !='M');
 		}
@@ -324,15 +362,21 @@ public class CalendarTester {
 					userInput = in.nextLine().toUpperCase().charAt(0);
 				} while (userInput != 'M' && userInput != 'P' && userInput != 'N');
 				if (userInput == 'N') {
-					date.roll(Calendar.MONTH,  true);
+					date.add(Calendar.MONTH,  1);
 				} else if (userInput == 'P') {
-					date.roll(Calendar.MONTH,  false);
+					date.add(Calendar.MONTH,  -1);
 				}
 			} while (userInput != 'M');
 		}
 
 	}
 	
+	/**
+	 * Display all the event occurring on a specific day
+	 * Helper function for main()
+	 * @param cal calendar to look at
+	 * @param date date to look at
+	 */
 	private static void printDay(MyCalendar cal, Calendar date) {
 		if (cal == null) {
 			System.out.println("You need to create or load a calendar first.");
@@ -351,6 +395,12 @@ public class CalendarTester {
 		}
 	}
 	
+	/**
+	 * Display all the event occurring on a specific month
+	 * Helper function for main()
+	 * @param cal calendar to look at
+	 * @param date month to look at (only the month is used)
+	 */
 	private static void printMonth(MyCalendar cal, Calendar date) {
 		if (cal == null) {
 			System.out.println("You need to create or load a calendar first.");
@@ -360,7 +410,7 @@ public class CalendarTester {
 		Set<Event> list = cal.getMonthlyEvents(date.get(Calendar.YEAR), Event.Month.values()[date.get(Calendar.MONTH)]);
 		// Convert the list of Events into a list of day (we only care when the events occur)
 		Set<Integer> days = new TreeSet<Integer>();
-		if(list == null) {
+		if(list == null || list.isEmpty()) {
 			System.out.println("Nothing for this month");
 			return;
 		}
@@ -384,7 +434,6 @@ public class CalendarTester {
 		calendar.set(Calendar.DAY_OF_MONTH, 1);
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 		int currentDay = 1;
-		String dayNumber;
 		for(int i = 0; i < dayOfWeek; i++) {
 			System.out.print("   ");
 		}
@@ -407,6 +456,12 @@ public class CalendarTester {
 		}
 	}
 
+	/**
+	 * Go to a specific day of the calendar to look at events
+	 * Ask the user for the day
+	 * Helper function for main()
+	 * @param cal calendar to look at
+	 */
 	private static void goTo(MyCalendar cal) {
 		if (cal == null) {
 			System.out.println("You need to create or load a calendar first.");
@@ -414,41 +469,80 @@ public class CalendarTester {
 		}
 		
 		// Ask the user for a day
+		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
-		System.out.println("Enter a date (MM/DD/YYYY): ");
-		in.useDelimiter("[^0-9]+");
-		int month = in.nextInt();
-		int date = in.nextInt();
-		int year = in.nextInt();
-		in.nextLine();
-		// Create the appropriate calendar object
+		int month = -1;
+		int date = -1;
+		int year = -1;
 		Calendar day = getTodayCalifornianCalendar();
-		day.set(Calendar.YEAR,  year);
-		day.set(Calendar.MONTH, month-1);
-		day.set(Calendar.DATE, date);
+		in.useDelimiter("[^0-9]+");
+		do {
+			System.out.println("Enter a date (MM/DD/YYYY): ");
+			if (in.hasNextInt()){
+				month = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				date = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				year = in.nextInt();
+			}
+			in.nextLine();
+			try {
+				// Create the appropriate calendar object
+				day.set(Calendar.YEAR,  year);
+				day.set(Calendar.MONTH, month-1);
+				day.set(Calendar.DATE, date);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("Invalid date");
+				month = -1;
+			}
+		} while (month <= 0 || month <= 0 || year <= 0 );
 		
 		// Print the events of the day
 		printDay(cal, day);
 	}
 	
+	/**
+	 * Remove event(s) from the calendar
+	 * Save the calendar to disk if modified
+	 * @param cal calendar to update
+	 */
 	private static void delete(MyCalendar cal) {
 		if (cal == null) {
 			System.out.println("You need to create or load a calendar first.");
 			return;
 		}
 		// Ask the user for a day
+		@SuppressWarnings("resource")
 		Scanner in = new Scanner(System.in);
-		System.out.println("Enter a date (MM/DD/YYYY): ");
-		in.useDelimiter("[^0-9]+");
-		int month = in.nextInt();
-		int date = in.nextInt();
-		int year = in.nextInt();
-		in.nextLine();
-		// Create the appropriate calendar object
+		int month = -1;
+		int date = -1;
+		int year = -1;
 		Calendar day = getTodayCalifornianCalendar();
-		day.set(Calendar.YEAR,  year);
-		day.set(Calendar.MONTH, month-1);
-		day.set(Calendar.DATE, date);
+		in.useDelimiter("[^0-9]+");
+		do {
+			System.out.println("Enter a date (MM/DD/YYYY): ");
+			if (in.hasNextInt()){
+				month = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				date = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				year = in.nextInt();
+			}
+			in.nextLine();
+			try {
+				// Create the appropriate calendar object
+				day.set(Calendar.YEAR,  year);
+				day.set(Calendar.MONTH, month-1);
+				day.set(Calendar.DATE, date);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("Invalid date");
+				month = -1;
+			}
+		} while (month <= 0 || month <= 0 || year <= 0 );
 		
 		// Get all the events that day;
 		ArrayList<Event> list = cal.getDailyEvents(day);

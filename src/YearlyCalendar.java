@@ -5,7 +5,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-
+/**
+ * Represent a calendar for a year
+ * @author isabelle Delmas
+ *
+ */
 public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 	/**
 	 * 
@@ -36,9 +40,34 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 	/**
 	 * Add an event in the appropriate set
 	 * @param event event to add to the calendar
+	 * @return true if the event was successfully added
 	 */
-	public void addEvent(Event event) {
-		eventsByMonths[event.getEventDate().get(Calendar.MONTH)].add(event);
+	public boolean addEvent(Event event) {
+		boolean success = true;
+		
+		// Check if there is a conflicting event
+		ArrayList<Event> list = this.getOneDayEvents(event.getEventDate());
+		int i = 0;
+		
+		// Look at all the events from that day, in order
+		while (i < list.size() && success) {
+			// if the event start after another
+			if (event.getEventStart().isAfter(list.get(i).getEventStart())) {
+				// but before its end
+				if (list.get(i).getEventEnd() != null) {
+					if (event.getEventStart().isBefore(list.get(i).getEventEnd())) {
+						// signify failure
+						success = false;
+					}
+				}
+			}
+		}
+		// If no conflict was found
+		if (success) {
+			eventsByMonths[event.getEventDate().get(Calendar.MONTH)].add(event);
+		}
+		
+		return success;
 	}
 	
 	/**
@@ -58,6 +87,10 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 		return size;
 	}
 	
+	/**
+	 * Return true if there are no event in that calendar
+	 * @return true if there are no event in that calendar
+	 */
 	public boolean isEmpty() {
 		return size() == 0;
 	}
@@ -129,7 +162,8 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 	}
 	
 	/**
-	 * remove a specific event from the calendar
+	 * Remove a specific event from the calendar
+	 * Does nothing if the event is not in the calendar.
 	 * @param event reference to the event to remove
 	 */
 	public void remove(Event event) {

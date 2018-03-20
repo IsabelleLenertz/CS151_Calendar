@@ -2,6 +2,11 @@ import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.Calendar;
 
+/**
+ * Store information about a specific event
+ * @author isabelle Delmas
+ *
+ */
 public final class Event implements Comparable<Event>, Serializable {
 	
 	/**
@@ -10,13 +15,13 @@ public final class Event implements Comparable<Event>, Serializable {
 	private static final long serialVersionUID = 304520817428918788L;
 
 	public enum Day {
-	    SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY 
+	    Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday 
 	}
 	public enum DayAbbreviation{
 		Su, Mo, Tu, We, Th, Fr, Sa
 	}
 	public enum Month{
-		JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEMPTEMBER, NOVEMBER, DECEMBER
+		JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEMPTEMBER, OCTOBER, NOVEMBER, DECEMBER
 	}
 	
 	private Calendar date;
@@ -24,6 +29,13 @@ public final class Event implements Comparable<Event>, Serializable {
 	private LocalTime start;
 	private LocalTime end;
 	
+	/**
+	 * Constructor
+	 * @param nDate the day the event occurs
+	 * @param nName title of the event
+	 * @param nStart time the event starts on
+	 * @param nEnd time the event ends on, null if no end time
+	 */
 	public Event(Calendar nDate, String nName, LocalTime nStart, LocalTime nEnd) {
 		this.date = nDate;
 		this.name = nName;
@@ -31,22 +43,53 @@ public final class Event implements Comparable<Event>, Serializable {
 		this.end = nEnd;
 	}
 	
+	/**
+	 * Get the time event starts
+	 * @return time the event start
+	 */
 	public LocalTime getEventStart() { return this.start; }
+	
+	/**
+	 * get the end time of the event
+	 * @return end time of the event, null if no end time
+	 */
 	public LocalTime getEventEnd() { return this.end; }
+	
+	/**
+	 * Get the day the event occurs
+	 * @return the day the event occurs
+	 */
 	public Calendar getEventDate() { return this.date; }
 	
 	/**
-	 * Format of the String returned by the method()
-	 * Wednesday, Feb 21, 2018 
-	 * Dr. Kim's office hour 9:15 - 10:15 
-
+	 * Get the information about the event nicely formated
+	 * @return a String with the info about the event
 	 */
 	public String toString() { 
-		return Day.values()[date.get(Calendar.DAY_OF_WEEK)-1].toString() + ", " 
-				+ Month.values()[date.get(Calendar.MONTH)].toString().substring(0, 3);
+		String returnString =  Day.values()[date.get(Calendar.DAY_OF_WEEK)-1].toString() + ", " 
+				+ Month.values()[date.get(Calendar.MONTH)].toString().substring(0, 1)
+				+ Month.values()[date.get(Calendar.MONTH)].toString().substring(1, 3).toLowerCase()+ " "
+				+ date.get(Calendar.DATE) + ", " + date.get(Calendar.YEAR) + "   ";
+		
+		for (int i = returnString.length(); i < 30; i++) {
+			returnString += " ";
+		}
+		
+		returnString += name + " " + start.toString().substring(0, 5);
+			
+		if (end != null) {
+			returnString += " - " + end.toString().substring(0, 5);
+		}
+		
+		return returnString;
 		
 	}
 
+	/**
+	 * Compare two events
+	 * @param other event to compare to
+	 * @return a negative number if the other event comes first, a positive number if this comes first, 0 if they start at the same time.
+	 */
 	@Override
 	public int compareTo(Event other) {		
 		// Compare the year, month, and day
