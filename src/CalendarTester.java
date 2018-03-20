@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.DateTimeException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,14 +45,14 @@ public class CalendarTester {
 					if (calendar != null) {
 						System.out.println(calendar);
 					}
-					// TODO
 					break;
 				case('D'):
-					System.out.println("d");
-					// TODO
+					delete(calendar);
 					break;
 			}
 		}
+		// Update the file before exiting
+		save(calendar);
 		
 	}
 
@@ -163,41 +164,92 @@ public class CalendarTester {
 		System.out.print("Title: ");
 		String title = in.nextLine();
 		
-		// Get the date
+		// Get the date and validate input
 		in.useDelimiter("[^0-9]+");
-		System.out.print("Date (Format MM/DD/YYYY): ");
-		int month = in.nextInt();
-		int date = in.nextInt();
-		int year = in.nextInt();
-		in.nextLine();
+		int month = -1;
+		int date = -1;
+		int year = -1;
+		do {
+			System.out.print("Date (Format MM/DD/YYYY): ");
+			
+			if (in.hasNextInt()) {
+				month = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				date = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				year = in.nextInt();
+			}
+			in.nextLine();
+			
+			// Create a new event
+			Calendar day = getTodayCalifornianCalendar();
+			try{
+				day.set(Calendar.YEAR,  year);
+				day.set(Calendar.MONTH, month-1);
+				day.set(Calendar.DATE, date);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				year = -1;
+			}
+		} while( (month < 1 || month > 12) && (date < 0) && year < 0);
 		
 		// Get starting time
-		System.out.print("Starting time (24 hours clock, HH:MM): ");
-		int startH = in.nextInt();
-		int startM = in.nextInt();
-		in.nextLine();
+		int startH = -1;
+		int startM = -1;
+		LocalTime start = null;
+		do {
+			System.out.print("Starting time (24 hours clock, HH:MM): ");
+			if (in.hasNextInt()) {
+				startH = in.nextInt();
+			}
+			if (in.hasNextInt()) {
+				startM = in.nextInt();
+			}
+			in.nextLine();
+			try {
+				start = LocalTime.of(startH, startM);
+			} catch (DateTimeException  e) {
+				System.out.println("Invalid time.");
+				// Make sure to ask user for another time
+				startH = -1;
+				startM = -1;
+			}
+		} while (startH < 0 || startM < 0);
+
 		
 		// Get ending time
 		System.out.print("Ending time (24 hours clock, HH:MM, leave blank if not appropriate): ");
+		Scanner endtime = new Scanner(in.nextLine());
 		Integer endH = null;
 		Integer endM= null;
 		// TODO fix it no integer entered
-		if(in.hasNextInt()) {
-			endH = in.nextInt();
-			endM = in.nextInt();
+		endtime.useDelimiter("[^0-9]+");
+		if(endtime.hasNextInt()) {
+			endH = endtime.nextInt();
+		} 
+		if (endtime.hasNextInt()) {
+			endM = endtime.nextInt();
 		}
-		in.nextLine();
+		endtime.close();
+		LocalTime end = null;
+		try {
+			if(endH != null) {
+				end = LocalTime.of(endH,  endM);
+			} else {
+				System.out.println("No ending time recorded.");
+			}
+		} catch (DateTimeException e) {
+			System.out.println("Invalid time. No ending time recorded.");
+		}
+
+		
 		
 		// Create a new event
 		Calendar day = getTodayCalifornianCalendar();
 		day.set(Calendar.YEAR,  year);
 		day.set(Calendar.MONTH, month-1);
 		day.set(Calendar.DATE, date);
-		LocalTime start = LocalTime.of(startH, startM);
-		LocalTime end = null;
-		if(endH != null) {
-			end = LocalTime.of(endH,  endM);
-		}
 		Event newEvent = new Event(day, title, start, end);
 		
 
@@ -206,13 +258,22 @@ public class CalendarTester {
 			// Add to calendar
 			cal.addEvent(newEvent);
 			
+			System.out.println("The following event has been added to the calendar:");
+			System.out.println(newEvent);
+			
 			// Save to disk
 			save(cal);
+		} else {
+			System.out.print("Event not saved, there was a conflict with the calendar.");
 		}
 		
 	}
 	
 	private static void save(MyCalendar cal) {
+		if (cal == null) {
+			System.out.println("You need to create or load a calendar first.");
+			return;
+		}
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CalendarTester.FILE_NAME)) ){
 			oos.writeObject(cal);
 			oos.close();
@@ -222,6 +283,11 @@ public class CalendarTester {
 	}
 
 	private static void viewBy(MyCalendar cal) {
+		if (cal == null) {
+			System.out.println("You need to create or load a calendar first.");
+			return;
+		}
+		
 		System.out.println("[D]ay view or [M]view ? ");
 		Scanner in = new Scanner(System.in);
 		char userInput = 0;
@@ -268,6 +334,11 @@ public class CalendarTester {
 	}
 	
 	private static void printDay(MyCalendar cal, Calendar date) {
+		if (cal == null) {
+			System.out.println("You need to create or load a calendar first.");
+			return;
+		}
+		
 		ArrayList<Event> list = cal.getDailyEvents(date);
 		
 		if(list == null || list.size() == 0) {
@@ -281,6 +352,11 @@ public class CalendarTester {
 	}
 	
 	private static void printMonth(MyCalendar cal, Calendar date) {
+		if (cal == null) {
+			System.out.println("You need to create or load a calendar first.");
+			return;
+		}
+		
 		Set<Event> list = cal.getMonthlyEvents(date.get(Calendar.YEAR), Event.Month.values()[date.get(Calendar.MONTH)]);
 		// Convert the list of Events into a list of day (we only care when the events occur)
 		Set<Integer> days = new TreeSet<Integer>();
@@ -332,6 +408,10 @@ public class CalendarTester {
 	}
 
 	private static void goTo(MyCalendar cal) {
+		if (cal == null) {
+			System.out.println("You need to create or load a calendar first.");
+			return;
+		}
 		
 		// Ask the user for a day
 		Scanner in = new Scanner(System.in);
@@ -349,5 +429,67 @@ public class CalendarTester {
 		
 		// Print the events of the day
 		printDay(cal, day);
+	}
+	
+	private static void delete(MyCalendar cal) {
+		if (cal == null) {
+			System.out.println("You need to create or load a calendar first.");
+			return;
+		}
+		// Ask the user for a day
+		Scanner in = new Scanner(System.in);
+		System.out.println("Enter a date (MM/DD/YYYY): ");
+		in.useDelimiter("[^0-9]+");
+		int month = in.nextInt();
+		int date = in.nextInt();
+		int year = in.nextInt();
+		in.nextLine();
+		// Create the appropriate calendar object
+		Calendar day = getTodayCalifornianCalendar();
+		day.set(Calendar.YEAR,  year);
+		day.set(Calendar.MONTH, month-1);
+		day.set(Calendar.DATE, date);
+		
+		// Get all the events that day;
+		ArrayList<Event> list = cal.getDailyEvents(day);
+		
+		if(list == null || list.size() == 0) {
+			System.out.println("Nothing for that day");
+			return;
+		}
+		
+		for(int i = 0; i < list.size(); i++) {
+			System.out.println( (i+1) + ") " + list.get(i));
+		}
+		
+		// Get user choice
+		char userChoice = 0;
+		in.reset();
+		while(userChoice != 'S' && userChoice != 'A') {
+			System.out.println("Delete [S]election or [A]ll? ");
+			userChoice = in.nextLine().toUpperCase().charAt(0);
+		}
+		switch(userChoice) {
+			// Select an event to remove
+			case('S'):
+				int userInt = 0;
+				do {
+					System.out.println("Number of the event you want to remove (between 1 and " + list.size() + ":" );
+					in.useDelimiter("[^0-9]+");
+					userInt = in.nextInt();
+				}while (userInt < 1 || userInt > list.size());
+				cal.remove(list.get(userInt-1));
+				break;
+			
+			// Remove all the events
+			case('A'):
+				for (Event event : list) {
+					cal.remove(event);
+				}
+				break;
+		}
+		save(cal);
+
+		
 	}
 }

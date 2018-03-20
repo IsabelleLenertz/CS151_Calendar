@@ -50,6 +50,18 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 		return eventsByMonths[month.ordinal()];
 	}
 	
+	public int size() {
+		int size = 0;
+		for (Set<Event> list : eventsByMonths) {
+			size += list.size();
+		}
+		return size;
+	}
+	
+	public boolean isEmpty() {
+		return size() == 0;
+	}
+	
 	
 	/**
 	 * Get all the events occurring on a single day
@@ -114,5 +126,13 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 			}
 		}
 		return returnValue;
+	}
+	
+	/**
+	 * remove a specific event from the calendar
+	 * @param event reference to the event to remove
+	 */
+	public void remove(Event event) {
+		eventsByMonths[event.getEventDate().get(Calendar.MONTH)].remove(event);		
 	}
 }

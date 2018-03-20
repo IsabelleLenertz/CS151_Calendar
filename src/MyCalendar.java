@@ -95,6 +95,17 @@ public class MyCalendar implements Serializable{
 		}
 		return returnValue;
 	}
+	
+	public void remove(Event event) {
+		int year = event.getEventDate().get(Calendar.YEAR);
+		YearlyCalendar cal = this.calendar.get(year);
+		if (cal != null) {
+			cal.remove(event);
+			if(cal.isEmpty()) {
+				this.calendar.remove(year);
+			}
+		}
+	}
 
 	
 
