@@ -1,8 +1,12 @@
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Set;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 /**
@@ -112,6 +116,33 @@ public class MyCalendar implements Serializable{
 		}
 	}
 
+	/**
+	 * Get a Gregorian calendar setup with the pacific time zone and the daylight saving time
+	 * the day is today and the time is the time of the run
+	 * Helper function for main()
+	 * @return today's calendar
+	 */
+	public static Calendar getTodayCalifornianCalendar() {
+		 // Get local time zone for California (Pacific Standard Time)
+		 String[] timeZoneId = TimeZone.getAvailableIDs(-8 * 60 * 60 * 1000);
+		 // if no timeZone was returned, exit program.
+		 if (timeZoneId.length == 0) {
+		     System.out.println("Could not initiate the time zone, exiting program");
+			 System.exit(0);
+		 }
+		 SimpleTimeZone pacificTimeZone = new SimpleTimeZone(-8 * 60 * 60 * 1000, timeZoneId[0]);
+		
+		 // Set up rules for Daylight Saving Time
+		 pacificTimeZone.setStartRule(Calendar.APRIL, 1, Calendar.SUNDAY, 2 * 60 * 60 * 1000);
+		 pacificTimeZone.setEndRule(Calendar.OCTOBER, -1, Calendar.SUNDAY, 2 * 60 * 60 * 1000);
+		
+		 // create a GregorianCalendar with the Pacific Daylight time zone and the current date and time
+		 Calendar calendar = new GregorianCalendar(pacificTimeZone);
+		 Date runTime = new Date();
+		 calendar.setTime(runTime);
+		 
+		 return calendar;
+	}
 	
 
 

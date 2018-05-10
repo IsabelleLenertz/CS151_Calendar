@@ -61,6 +61,7 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 					}
 				}
 			}
+			i++;
 		}
 		// If no conflict was found
 		if (success) {
