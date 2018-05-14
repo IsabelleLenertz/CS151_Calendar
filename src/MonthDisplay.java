@@ -28,6 +28,10 @@ public class MonthDisplay extends JPanel {
 	private final static int ROWS = 6;
 	private final static int COLS = 7;
 	//private MyCalendar calendar;
+	JButton createBtn;
+	JTextArea currentMonth;
+	JList<String> listDays;
+	
 
 	/**
 	 * Create a JPanel display the current Month
@@ -42,17 +46,30 @@ public class MonthDisplay extends JPanel {
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		
 		// Add the Create Button
-		JButton createBtn = new JButton("Create");
-		this.add(createBtn);
+		this.createBtn = new JButton("Create");
+		this.add(this.createBtn);
 		// TODO define MouseListener for JButton
 		
 		// Add display of the current Month
-		JTextArea currentMonth = new JTextArea (Event.Month.values()[today.get(Calendar.MONTH)].toString()) ;
-		currentMonth.setEditable(false);
+		this.currentMonth = new JTextArea (Event.Month.values()[today.get(Calendar.MONTH)].toString()) ;
+		this.currentMonth.setEditable(false);
 		this.add(currentMonth);
 		
 		// Create Jlist and populate it with all the day existing in that month
 		// Get the list of days as an array, blank filed are set to ""
+		String[] arrayDays = getArrayOfDays(today);
+
+		listDays = new JList<String>(arrayDays);
+		this.listDays.setCellRenderer(new MonthDisplay.CellRenderer());
+		this.listDays.setPrototypeCellValue("123");
+		this.listDays.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		this.listDays.setVisibleRowCount(COLS);
+		// TODO define MouseListener for JList
+		this.add(listDays);
+		
+	}
+	
+	private String[] getArrayOfDays(Calendar currentDay) {
 		String[] arrayDays = new String[49];
 		int index;
 
@@ -60,9 +77,8 @@ public class MonthDisplay extends JPanel {
 			arrayDays[index] = Event.DayAbbreviation.values()[index].toString();
 		}
 		// get first day of the month
-		Calendar currentDay = MyCalendar.getTodayCalifornianCalendar();
 		int day = 1;
-		currentDay.set(Calendar.DAY_OF_MONTH,  1);
+		currentDay.set(Calendar.DAY_OF_MONTH,  day);
 		// Fill the empty calendar days
 		for(; index < currentDay.get(Calendar.DAY_OF_WEEK); index++) {
 			arrayDays[index] = ".";
@@ -76,19 +92,19 @@ public class MonthDisplay extends JPanel {
 		for(;index < ROWS*COLS; index++) {
 			arrayDays[index] = ".";
 		}
-		for(String element: arrayDays) {
-			System.out.print(element + " ");
-		}
-		JList<String> listDays = new JList<String>(arrayDays);
-		listDays.setCellRenderer(new MonthDisplay.CellRenderer());
-		listDays.setPrototypeCellValue("123");
-		listDays.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		listDays.setVisibleRowCount(COLS);
-		// TODO define MouseListener for JList
-		this.add(listDays);
-		
-		
+		return arrayDays;
 	}
+	
+	/**
+	 * Notify a change in display
+	 * @param day reference to the new day to display
+	 */
+	public void updateDisplay(Calendar day) {
+		this.listDays.setListData(this.getArrayOfDays(day));
+		this.currentMonth.setText(Event.Month.values()[day.get(Calendar.MONTH)].toString());
+		repaint();
+	}
+	
 	
 	// Define the display of the JList
 	private class CellRenderer extends JLabel implements ListCellRenderer<String> {
