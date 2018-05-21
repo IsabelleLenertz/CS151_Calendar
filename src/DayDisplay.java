@@ -10,21 +10,23 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneLayout;
 
 
-public class DayDisplay extends JPanel{
+public class DayDisplay extends JPanel implements View{
 
 	private static final long serialVersionUID = -929261367290895680L;
 	private static final int HOURS_IN_DAY = 24;
-	Calendar today;		
-	MyCalendar calendar;
-	JTextArea dateDisplay;
-	JLabel separator;
-	JScrollPane scroll;
-	HourDisplay[] events; 
+	private DayModel currentDay;		
+	private MyCalendar calendar;
+	private JTextArea dateDisplay;
+	private JLabel separator;
+	private JScrollPane scroll;
+	private HourDisplay[] events; 
+	private JPanel scrollPanel;
 	
 	
-	public DayDisplay(MyCalendar cal) {
+	public DayDisplay(MyCalendar cal, DayModel aDay) {
+		this.currentDay = aDay;
 		this.calendar = cal;
-		today = MyCalendar.getTodayCalifornianCalendar();
+		Calendar today = this.currentDay.getDay();
 		
 		// Get a layout manager (vertical display)
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -46,31 +48,40 @@ public class DayDisplay extends JPanel{
 		this.add(this.separator);
 		
 		// Create the scroll pane with the events display
-		JPanel scrollPanel = new JPanel();
+		scrollPanel = new JPanel();
 		scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.PAGE_AXIS));
 		events = new HourDisplay[HOURS_IN_DAY];
 		for(int i = 0; i < HOURS_IN_DAY; i++) {
-			events[i] = new HourDisplay(i, this.today, this.calendar);
+			events[i] = new HourDisplay(i, today, this.calendar);
 			scrollPanel.add(events[i]);
 		}
 		this.scroll = new JScrollPane(scrollPanel);
 		this.add(scroll);
 	}
-	
-	/**
-	 * Notify the view to change the day to display
-	 * @param newDay
-	 */
-	public void changeDay(Calendar newDay) {
-		this.today = newDay;
-		repaint();
-	}
-	
+
 	/**
 	 * Notify the view the the current model has changed
 	 * Update the display
 	 */
-	public void CalendarHasChanged() {
+	public void updateDisplay() {
+		Calendar today = this.currentDay.getDay();
+		
+		
+		// Update the display of the date
+		String date =  Event.Day.values()[today.get(Calendar.DAY_OF_WEEK)-1].toString() + ", " 
+				+ Event.Month.values()[today.get(Calendar.MONTH)].toString().substring(0, 1)
+				+ Event.Month.values()[today.get(Calendar.MONTH)].toString().substring(1, 3).toLowerCase()+ " "
+				+ today.get(Calendar.DATE) + ", " + today.get(Calendar.YEAR) + "   ";
+		this.dateDisplay.setText(date);
+		
+		// Update the events
+		scrollPanel.removeAll();
+		for(int i = 0; i < HOURS_IN_DAY; i++) {
+			events[i] = new HourDisplay(i, today, this.calendar);
+			scrollPanel.add(events[i]);
+		}
+
+
 		// Update display
 		this.repaint();
 	}

@@ -20,26 +20,32 @@ public class SimpleCalendar {
 		JPanel panel2 = new JPanel();
 		
 		// Create/load the models
-		final Calendar dayToLookAt = MyCalendar.getTodayCalifornianCalendar();		// Model for the current day
+		final DayModel dayToLookAt = new DayModel(MyCalendar.getTodayCalifornianCalendar());// Model for the current day
 		final MyCalendar cal = load();												// Model storing the events
 
 		// Load the views
 		final MonthDisplay monthToLookAtView = new MonthDisplay(dayToLookAt);
-		final DayDisplay dayToLookAtView = new DayDisplay(cal);
+		final DayDisplay dayToLookAtView = new DayDisplay(cal, dayToLookAt);
+		dayToLookAt.addView(monthToLookAtView);
+		dayToLookAt.addView(dayToLookAtView);
 		panel2.add(monthToLookAtView);		// View the month (also a controller for calendar of events, through the create button, and controller for the month, through the clickable days))
 		panel2.add(dayToLookAtView);				// View for the calendar events and dayToLookAt (uses info sorted in dayToLookAt to display info from calendar events)
 		
 		// Create Controller for the view of the month ( <-- and --> buttons change dayToLookAt and notify the views)
 		JButton previous = new JButton("<");
 		previous.addActionListener(e -> {
-			dayToLookAt.add(Calendar.DATE,  -1);			// Go to the next day
-			monthToLookAtView.updateDisplay();			// notify view of the change
+			// Get calendar
+			Calendar c = dayToLookAt.getDay();
+			c.add(Calendar.DATE,  -1);			// Go to the next day
+			dayToLookAt.setDay(c);				// Set the new day in the model, the model's constructor will notify the views
 		});
 		
 		JButton next = new JButton (">");
 		next.addActionListener(e -> {
-			dayToLookAt.add(Calendar.DATE,  1);			// Go to the next day
-			monthToLookAtView.updateDisplay();			// notify view of the change
+			// Get calendar
+			Calendar c = dayToLookAt.getDay();
+			c.add(Calendar.DATE,  1);			// Go to the next day
+			dayToLookAt.setDay(c);				// Set the new day in the model, the model's constructor will notify the views
 		});
 		panel1.add(previous);
 		panel1.add(next);

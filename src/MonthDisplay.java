@@ -1,5 +1,7 @@
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Calendar;
 
 import javax.swing.BoxLayout;
@@ -22,7 +24,7 @@ import javax.swing.ListCellRenderer;
  * @update 
  *
  */
-public class MonthDisplay extends JPanel {
+public class MonthDisplay extends JPanel implements View{
 	
 	private static final long serialVersionUID = -344928104922528344L;
 	private final static int ROWS = 6;
@@ -30,7 +32,7 @@ public class MonthDisplay extends JPanel {
 	//private MyCalendar calendar;
 	JButton createBtn;
 	JTextArea currentMonth;
-	private Calendar currentDay;
+	private DayModel currentDay;
 	JList<String> listDays;
 	
 	
@@ -39,7 +41,7 @@ public class MonthDisplay extends JPanel {
 	 * Create a JPanel display the current Month
 	 * All buttons are created active
 	 */
-	public MonthDisplay(Calendar today) {
+	public MonthDisplay(DayModel today) {
 		// Saves reference to the model to modify it when needed
 		this.currentDay = today;
 		
@@ -52,7 +54,7 @@ public class MonthDisplay extends JPanel {
 		// TODO define MouseListener for JButton
 		
 		// Add display of the current Month
-		this.currentMonth = new JTextArea (Event.Month.values()[this.currentDay.get(Calendar.MONTH)].toString()) ;
+		this.currentMonth = new JTextArea (Event.Month.values()[this.currentDay.getDay().get(Calendar.MONTH)].toString()) ;
 		this.currentMonth.setEditable(false);
 		this.add(currentMonth);
 		
@@ -65,7 +67,23 @@ public class MonthDisplay extends JPanel {
 		this.listDays.setPrototypeCellValue("123");
 		this.listDays.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		this.listDays.setVisibleRowCount(COLS);
-		// TODO define MouseListener for JList
+		// Controller for the dayToLookAt
+		this.listDays.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				String selected = listDays.getSelectedValue();
+				try {
+					int day = Integer.parseInt(selected);
+					// Get the calendar
+					Calendar cal = currentDay.getDay();
+					cal.set(Calendar.DAY_OF_MONTH,  day);
+					// Set the new calendar
+					currentDay.setDay(cal);			// Change model, the model's mutator will notify the views
+					
+				} catch (Exception err) {
+					// do nothing
+				}
+			}
+		});
 		this.add(listDays);
 	
 	}
@@ -73,7 +91,7 @@ public class MonthDisplay extends JPanel {
 	private String[] getArrayOfDays() {
 		String[] arrayDays = new String[49];
 		int index;
-		Calendar today = (Calendar) this.currentDay.clone();
+		Calendar today = (Calendar) this.currentDay.getDay().clone();
 
 		for(index = 0; index < COLS; index++) {
 			arrayDays[index] = Event.DayAbbreviation.values()[index].toString();
@@ -86,11 +104,11 @@ public class MonthDisplay extends JPanel {
 		index += today.get(Calendar.DAY_OF_WEEK) - 1;
 		
 		// Fill the empty calendar days
-		for(; index < this.currentDay.get(Calendar.DAY_OF_WEEK); index++) {
+		for(; index < this.currentDay.getDay().get(Calendar.DAY_OF_WEEK); index++) {
 			arrayDays[index] = ".";
 		}
 		// Fill in the fields with the days
-		for(; day <= this.currentDay.getActualMaximum(Calendar.DAY_OF_MONTH) ; index++) {
+		for(; day <= this.currentDay.getDay().getActualMaximum(Calendar.DAY_OF_MONTH) ; index++) {
 			arrayDays[index] = "" + day;
 			day++;
 		}
@@ -109,7 +127,7 @@ public class MonthDisplay extends JPanel {
 		// Look at the new day and updates the table of days
 		this.listDays.setListData(this.getArrayOfDays());
 		// Look at the new day and update the display of the month
-		this.currentMonth.setText(Event.Month.values()[currentDay.get(Calendar.MONTH)].toString());
+		this.currentMonth.setText(Event.Month.values()[currentDay.getDay().get(Calendar.MONTH)].toString());
 		repaint();
 	}
 	
@@ -140,7 +158,7 @@ public class MonthDisplay extends JPanel {
 	        } catch (Exception e) {
 	        	// do nothing
 	        }
-	        if (day == currentDay.get(Calendar.DAY_OF_MONTH)) {
+	        if (day == currentDay.getDay().get(Calendar.DAY_OF_MONTH)) {
 	            setBackground(list.getSelectionBackground());
 	            setForeground(list.getSelectionForeground());
 	        } else {
