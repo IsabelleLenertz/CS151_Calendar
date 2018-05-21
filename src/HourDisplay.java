@@ -42,15 +42,20 @@ public class HourDisplay extends JPanel {
 		
 		// Display the event happening within that hour
 		JTextArea eventDisplay= new JTextArea();
-		String eventString = ".........................................................................";
+		String blank = "                                                                                                         ";
+		String eventString = blank;
 		date = day;
 		ArrayList<Event> listOfEvents = cal.getDailyEvents(date);
 		this.start = LocalTime.of(hour24,  00);
 		this.end = LocalTime.of( (hour24 + 1) % 24,  0);
 		for(Event element : listOfEvents) {
 			// Get all the events happening within that hour in one string
-			if(element.getEventStart().isAfter(this.start) && element.getEventStart().isBefore(end)) {
-				eventString += element.toString() + "/n";
+			if(element.getEventStart().isAfter(this.start.minusMinutes(1)) && element.getEventStart().isBefore(end)) {
+				if (eventString.equals(blank)) {
+					eventString = element.toString() + "\n";
+				} else {
+					eventString = element.toString() + "\n";
+				}
 			}
 		}
 		// Display the string with the info about all the events

@@ -21,12 +21,34 @@ public class MyCalendar implements Serializable{
 	 */
 	private static final long serialVersionUID = -8135952509631155591L;
 	private Map<Integer, YearlyCalendar> calendar;;
+	private transient ArrayList<View> views;
 
 	/**
 	 * Default constructor
 	 */
 	public MyCalendar() {
 		this.calendar = new TreeMap<Integer, YearlyCalendar>();
+		views = new ArrayList<View>();
+	}
+	
+	/**
+	 * Add a view to be notified in case of changes
+	 * @param v view to add
+	 */
+	public void addView(View v) {
+		if (views == null) {
+			views = new ArrayList<View>();
+		}
+		views.add(v);
+	}
+	
+	private void notifyViews() {
+		if(views != null) {
+			for (View element : views) {
+				element.updateDisplay();
+			}
+		}
+
 	}
 	
 	/**
@@ -55,6 +77,7 @@ public class MyCalendar implements Serializable{
 		}
 		success = cal.addEvent(event);
 		this.calendar.put(year, cal);
+		this.notifyViews();
 		
 		return success;
 	}
@@ -84,7 +107,7 @@ public class MyCalendar implements Serializable{
 		if (cal != null) {
 			return cal.getOneDayEvents(day);
 		}
-		return null;
+		return new ArrayList<Event>();
 	}
 	
 	
@@ -114,6 +137,7 @@ public class MyCalendar implements Serializable{
 				this.calendar.remove(year);
 			}
 		}
+		this.notifyViews();
 	}
 
 	/**

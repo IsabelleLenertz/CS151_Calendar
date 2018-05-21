@@ -24,7 +24,7 @@ public class DayModel {
 		views.add(v);
 	}
 	
-	public void notifyViews() {
+	private void notifyViews() {
 		for(View element : views) {
 			element.updateDisplay();
 		}

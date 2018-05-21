@@ -1,15 +1,21 @@
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalTime;
 import java.util.Calendar;
+import java.util.Scanner;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 
 /**
@@ -29,11 +35,11 @@ public class MonthDisplay extends JPanel implements View{
 	private static final long serialVersionUID = -344928104922528344L;
 	private final static int ROWS = 6;
 	private final static int COLS = 7;
-	//private MyCalendar calendar;
-	JButton createBtn;
-	JTextArea currentMonth;
+	private JButton createBtn;
+	private JTextArea currentMonth;
 	private DayModel currentDay;
-	JList<String> listDays;
+	private JList<String> listDays;
+	private MyCalendar eventCalendar;
 	
 	
 
@@ -41,9 +47,10 @@ public class MonthDisplay extends JPanel implements View{
 	 * Create a JPanel display the current Month
 	 * All buttons are created active
 	 */
-	public MonthDisplay(DayModel today) {
+	public MonthDisplay(MyCalendar cal, DayModel today) {
 		// Saves reference to the model to modify it when needed
 		this.currentDay = today;
+		this.eventCalendar = cal;
 		
 		// Set the layout manager (vertical display)
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -52,6 +59,13 @@ public class MonthDisplay extends JPanel implements View{
 		this.createBtn = new JButton("Create");
 		this.add(this.createBtn);
 		// TODO define MouseListener for JButton
+		// Controller for the event calendar
+		this.createBtn.addActionListener(e->{
+			// Open a controller window
+			EventsControllerPopUp popup = new EventsControllerPopUp();
+			
+			
+		});
 		
 		// Add display of the current Month
 		this.currentMonth = new JTextArea (Event.Month.values()[this.currentDay.getDay().get(Calendar.MONTH)].toString()) ;
@@ -131,6 +145,82 @@ public class MonthDisplay extends JPanel implements View{
 		repaint();
 	}
 	
+	private class EventsControllerPopUp extends JFrame{
+		
+		public EventsControllerPopUp() {
+			this.setLayout(new GridLayout(0, 1));
+			this.setSize(300,  100);
+
+			// Create the frame elements
+			JTextField eventTitle = new JTextField();
+			eventTitle.setText("Untitled event");
+			eventTitle.setSelectionStart(0);
+			eventTitle.setSelectionEnd(eventTitle.getText().length());
+			
+			JPanel bottomPanel = new JPanel();
+			JTextField eventStart = new JTextField();
+			eventStart.setText("10:00");
+			JTextField eventEnd = new JTextField();
+			eventEnd.setText("10:59");
+			JButton saveBtn = new JButton("SAVE");
+			bottomPanel.add(eventStart);
+			bottomPanel.add(eventEnd);
+			bottomPanel.add(saveBtn);
+			
+			// Add listener to the save button
+			saveBtn.addActionListener(e->{
+				Event event = null;
+				// Read user input
+				String eventName = eventTitle.getText();
+				String startTimeStr = eventStart.getText();
+				String endTimeStr = eventEnd.getText();
+				int startHours;
+				int startMinutes;
+				int endHours;
+				int endMinutes;
+				LocalTime startLocalTime = null;
+				LocalTime endLocalTime = null;
+
+				try {
+					startHours = Integer.parseInt(startTimeStr.substring(0, 2));
+					startMinutes = Integer.parseInt(startTimeStr.substring(3, 5));
+					endHours = Integer.parseInt(endTimeStr.substring(0, 2));
+					endMinutes = Integer.parseInt(endTimeStr.substring(3, 5));
+					
+					startLocalTime = LocalTime.of(startHours, startMinutes);
+					endLocalTime = LocalTime.of(endHours, endMinutes);
+					event = new Event(currentDay.getDay(), eventName, startLocalTime, endLocalTime);
+
+				} catch(Exception err){ 
+					// Do nothing
+				}
+				
+				
+				if (event != null) {
+					if (eventCalendar.addEvent(event)) {
+						System.out.println(event);
+						this.setVisible(false); //you can't see me!
+						this.dispose(); //Destroy the JFrame object
+					} else {
+						// Display error message
+						Frame frame = new Frame();
+						JOptionPane.showMessageDialog(frame,
+							    "You already have an event at that time. Please choose another time frame",
+							    "Conflit Error",
+							    JOptionPane.ERROR_MESSAGE);					
+						}
+				}
+			});
+				// Update events
+			
+				// Close pop-up window
+			
+			this.add(eventTitle);
+			this.add(bottomPanel);
+			this.setVisible(true);
+			this.pack();			
+		}
+	}
 	
 	// Define the display of the JList
 	private class CellRenderer extends JLabel implements ListCellRenderer<String> {

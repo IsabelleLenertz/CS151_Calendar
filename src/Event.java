@@ -66,16 +66,7 @@ public final class Event implements Comparable<Event>, Serializable {
 	 * @return a String with the info about the event
 	 */
 	public String toString() { 
-		String returnString =  Day.values()[date.get(Calendar.DAY_OF_WEEK)-1].toString() + ", " 
-				+ Month.values()[date.get(Calendar.MONTH)].toString().substring(0, 1)
-				+ Month.values()[date.get(Calendar.MONTH)].toString().substring(1, 3).toLowerCase()+ " "
-				+ date.get(Calendar.DATE) + ", " + date.get(Calendar.YEAR) + "   ";
-		
-		for (int i = returnString.length(); i < 30; i++) {
-			returnString += " ";
-		}
-		
-		returnString += name + " " + start.toString().substring(0, 5);
+		String returnString = name + " " + start.toString().substring(0, 5);
 			
 		if (end != null) {
 			returnString += " - " + end.toString().substring(0, 5);

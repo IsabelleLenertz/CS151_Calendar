@@ -60,6 +60,8 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 						success = false;
 					}
 				}
+			} else if (event.getEventStart().equals(list.get(i).getEventStart())) {
+				success = false;
 			}
 			i++;
 		}
@@ -111,23 +113,20 @@ public class YearlyCalendar implements Comparable<YearlyCalendar>, Serializable{
 		
 		// Get the first event
 		if(it.hasNext()) {
-			temp = it.next();	
+			temp = it.next();
+			if (temp.getEventDate().get(Calendar.DATE) == date) {
+				list.add(temp);
+			}
 		} else {
 			return list;
 		}
 		// Check all the event the the last one visited
-		while (it.hasNext() && temp.getEventDate().get(Calendar.DATE) < date) {
+		while (it.hasNext() && temp.getEventDate().get(Calendar.DATE) <= date) {
+			temp = it.next();
 			if (temp.getEventDate().get(Calendar.DATE) == date){
 				list.add(temp);
 			}
-			temp = it.next();
 		}
-		// Check the last one
-		if (temp.getEventDate().get(Calendar.DATE) == date){
-			list.add(temp);
-		}
-		
-		
 		return list;
 	}
 	

@@ -1,11 +1,16 @@
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Calendar;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class SimpleCalendar {
@@ -24,12 +29,13 @@ public class SimpleCalendar {
 		final MyCalendar cal = load();												// Model storing the events
 
 		// Load the views
-		final MonthDisplay monthToLookAtView = new MonthDisplay(dayToLookAt);
+		final MonthDisplay monthToLookAtView = new MonthDisplay(cal, dayToLookAt);
 		final DayDisplay dayToLookAtView = new DayDisplay(cal, dayToLookAt);
 		dayToLookAt.addView(monthToLookAtView);
 		dayToLookAt.addView(dayToLookAtView);
+		cal.addView(dayToLookAtView);
 		panel2.add(monthToLookAtView);		// View the month (also a controller for calendar of events, through the create button, and controller for the month, through the clickable days))
-		panel2.add(dayToLookAtView);				// View for the calendar events and dayToLookAt (uses info sorted in dayToLookAt to display info from calendar events)
+		panel2.add(dayToLookAtView);		// View for the calendar events and dayToLookAt (uses info sorted in dayToLookAt to display info from calendar events)
 		
 		// Create Controller for the view of the month ( <-- and --> buttons change dayToLookAt and notify the views)
 		JButton previous = new JButton("<");
@@ -52,6 +58,11 @@ public class SimpleCalendar {
 
 		// Create the quit button (saves the calendar event to memory)
 		JButton quit = new JButton("Quit");
+		quit.addActionListener(e-> {
+			save(cal);
+			window.setVisible(false);
+			window.dispose();
+		});
 		panel1.add(quit);
 				
 		window.add(panel1, BorderLayout.PAGE_START);
@@ -77,8 +88,30 @@ public class SimpleCalendar {
 		} catch (Exception e) {
 			cal = new MyCalendar();
 		}
+		if (cal == null) {
+			cal = new MyCalendar();
+		}
 		
 		return cal;
 	}
-
+	
+	/**
+	 * Save calendar to memory
+	 * 
+	 */
+	private static void save(MyCalendar cal) {
+		if (cal == null) {
+			return;
+		}
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME)) ){
+			oos.writeObject(cal);
+			oos.close();
+		} catch (IOException e) {
+			Frame frame = new Frame();
+			JOptionPane.showMessageDialog(frame,
+				    "Could not save the updated calendar",
+				    "Saving error",
+				    JOptionPane.ERROR_MESSAGE);
+		}
+	}
 }
