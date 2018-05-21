@@ -32,33 +32,39 @@ public class HourDisplay extends JPanel {
 			time = hour24+"am";
 		}
 		hour = new JTextArea(time);
-		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridx = 0;
 		c.gridy = 0;
+		c.gridwidth = 1;
+		c.weightx = 40;
+		c.anchor = GridBagConstraints.WEST;
 		hour.setEditable(false);
 		this.add(hour, c);
 		
 		// Display the event happening within that hour
 		JTextArea eventDisplay= new JTextArea();
+		String eventString = ".........................................................................";
 		date = day;
 		ArrayList<Event> listOfEvents = cal.getDailyEvents(date);
 		this.start = LocalTime.of(hour24,  00);
 		this.end = LocalTime.of( (hour24 + 1) % 24,  0);
 		for(Event element : listOfEvents) {
+			// Get all the events happening within that hour in one string
 			if(element.getEventStart().isAfter(this.start) && element.getEventStart().isBefore(end)) {
-				eventDisplay.setText(element.toString());
-			} else {
-				eventDisplay.setText("Nothing at that time of day.");
+				eventString += element.toString() + "/n";
 			}
 		}
+		// Display the string with the info about all the events
+		eventDisplay.setText(eventString);
+
 		eventDisplay.setEditable(false);
 		c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 1;
 		c.gridy = 0;
 		c.gridheight = 1;
 		c.gridwidth = 4;
-		c.anchor = GridBagConstraints.LINE_START;
+		c.anchor = GridBagConstraints.WEST;
+		c.weightx = 200;
+
 		this.add(eventDisplay, c);
 		
 		

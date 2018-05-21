@@ -30,18 +30,19 @@ public class MonthDisplay extends JPanel {
 	//private MyCalendar calendar;
 	JButton createBtn;
 	JTextArea currentMonth;
+	private Calendar currentDay;
 	JList<String> listDays;
+	
 	
 
 	/**
 	 * Create a JPanel display the current Month
 	 * All buttons are created active
 	 */
-	public MonthDisplay() {
+	public MonthDisplay(Calendar today) {
 		// Saves reference to the model to modify it when needed
-		//this.calendar = model;
+		this.currentDay = today;
 		
-		Calendar today = MyCalendar.getTodayCalifornianCalendar();
 		// Set the layout manager (vertical display)
 		this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		
@@ -51,13 +52,13 @@ public class MonthDisplay extends JPanel {
 		// TODO define MouseListener for JButton
 		
 		// Add display of the current Month
-		this.currentMonth = new JTextArea (Event.Month.values()[today.get(Calendar.MONTH)].toString()) ;
+		this.currentMonth = new JTextArea (Event.Month.values()[this.currentDay.get(Calendar.MONTH)].toString()) ;
 		this.currentMonth.setEditable(false);
 		this.add(currentMonth);
 		
 		// Create Jlist and populate it with all the day existing in that month
 		// Get the list of days as an array, blank filed are set to ""
-		String[] arrayDays = getArrayOfDays(today);
+		String[] arrayDays = getArrayOfDays();
 
 		listDays = new JList<String>(arrayDays);
 		this.listDays.setCellRenderer(new MonthDisplay.CellRenderer());
@@ -66,25 +67,30 @@ public class MonthDisplay extends JPanel {
 		this.listDays.setVisibleRowCount(COLS);
 		// TODO define MouseListener for JList
 		this.add(listDays);
-		
+	
 	}
 	
-	private String[] getArrayOfDays(Calendar currentDay) {
+	private String[] getArrayOfDays() {
 		String[] arrayDays = new String[49];
 		int index;
+		Calendar today = (Calendar) this.currentDay.clone();
 
 		for(index = 0; index < COLS; index++) {
 			arrayDays[index] = Event.DayAbbreviation.values()[index].toString();
 		}
 		// get first day of the month
 		int day = 1;
-		currentDay.set(Calendar.DAY_OF_MONTH,  day);
+		today.set(Calendar.DAY_OF_MONTH,  day);
+		
+		// Start filling it at the right index
+		index += today.get(Calendar.DAY_OF_WEEK) - 1;
+		
 		// Fill the empty calendar days
-		for(; index < currentDay.get(Calendar.DAY_OF_WEEK); index++) {
+		for(; index < this.currentDay.get(Calendar.DAY_OF_WEEK); index++) {
 			arrayDays[index] = ".";
 		}
 		// Fill in the fields with the days
-		for(; day <= currentDay.getActualMaximum(Calendar.DAY_OF_MONTH) ; index++) {
+		for(; day <= this.currentDay.getActualMaximum(Calendar.DAY_OF_MONTH) ; index++) {
 			arrayDays[index] = "" + day;
 			day++;
 		}
@@ -99,9 +105,11 @@ public class MonthDisplay extends JPanel {
 	 * Notify a change in display
 	 * @param day reference to the new day to display
 	 */
-	public void updateDisplay(Calendar day) {
-		this.listDays.setListData(this.getArrayOfDays(day));
-		this.currentMonth.setText(Event.Month.values()[day.get(Calendar.MONTH)].toString());
+	public void updateDisplay() {
+		// Look at the new day and updates the table of days
+		this.listDays.setListData(this.getArrayOfDays());
+		// Look at the new day and update the display of the month
+		this.currentMonth.setText(Event.Month.values()[currentDay.get(Calendar.MONTH)].toString());
 		repaint();
 	}
 	
@@ -124,7 +132,6 @@ public class MonthDisplay extends JPanel {
 				boolean cellHasFocus){
 			// TODO Auto-generated method stub
 	        setText(value);
-	        Calendar today = MyCalendar.getTodayCalifornianCalendar();
 	        
 	        // Get the day
 	        int day = 0;
@@ -133,7 +140,7 @@ public class MonthDisplay extends JPanel {
 	        } catch (Exception e) {
 	        	// do nothing
 	        }
-	        if (day == today.get(Calendar.DAY_OF_MONTH)) {
+	        if (day == currentDay.get(Calendar.DAY_OF_MONTH)) {
 	            setBackground(list.getSelectionBackground());
 	            setForeground(list.getSelectionForeground());
 	        } else {
